@@ -1,14 +1,13 @@
 use std::iter::FromIterator;
 
-#[derive(Debug, Clone)]
-pub struct Node<T> {
-    data: T,
-    next: Option<SimpleLinkedList<T>>,
-}
-
-#[derive(Debug, Clone)]
 pub struct SimpleLinkedList<T> {
     head: Option<Box<Node<T>>>,
+}
+
+
+pub struct Node<T> {
+    data: T,
+    next: Option<Box<Node<T>>>,
 }
 
 impl<T> SimpleLinkedList<T> {
@@ -19,79 +18,43 @@ impl<T> SimpleLinkedList<T> {
     }
 
     pub fn len(&self) -> usize {
-        let mut len = 0;
-        match self.head {
-            Some(node) => {},
-            None => {},
-        }
-
-        len as usize
-    }
-
-    pub fn push(&mut self, element: T) {
-        let mut current = self.head;
-        let write_node = Node {
-            data: element,
-            next: None,
-        };
+        let mut len = 0usize;
+        let mut current = &self.head;
         loop {
             match current {
-                Some(mut node) => {
-                    let unboxed_node = *node;
-                    match unboxed_node.next {
-                        Some(next_ll) => {
-                            current = next_ll.head;
-                        },
-                        None => {
-                            let write_ll = SimpleLinkedList {
-                                head: Some(Box::new(write_node)),
-                            };
-                            unboxed_node.next = Some(write_ll);
-                            break;
-                        }
-                    }
+                Some(ref node) => {
+                    len += 1;
+                    current = &node.next;
                 },
                 None => {
-                   current = Some(Box::new(write_node));
-                   break;
-                },
-            }
-        }
-    }
-
-    pub fn pop(&mut self) -> Option<T> {
-         let mut current = self.head;
-         let mut pop_data = None;
-         loop {
-            match current {
-                Some(mut node) => {
-                    let unboxed_node = *node;
-                    match unboxed_node.next {
-                        Some(next_ll) => {
-                            current = next_ll.head;
-                        },
-                        None => {
-                            pop_data = Some(unboxed_node.data);
-                            current = None;
-                            break;
-                        }
-                    }
-                },
-                None => {
-                    pop_data = None;
                     break;
                 },
             }
         }
-        pop_data
+        len
+    }
+
+    pub fn push(&mut self, element: T) {
+        self.head = Some(Box::new(Node::<T> {
+            data: element,
+            next: self.head.take(),
+        }));
+    }
+
+    pub fn pop(&mut self) -> Option<T> {
+        match self.head.take() {
+            Some(mut node) => {
+                self.head = node.next.take();
+                Some(node.data)
+            },
+            None => None,
+        }
     }
 
     pub fn peek(&self) -> Option<&T> {
-        let node = self.head;
-        match node {
-            Some(n) => {
-                let temp = *n;
-                Some(&temp.data)
+        match self.head {
+            Some(ref n) => {
+                Some(&n.data)
             },
             None => None,
         }
@@ -131,7 +94,7 @@ impl<T> FromIterator<T> for SimpleLinkedList<T> {
 // demands more of the student than we expect at this point in the track.
 
 impl<T> Into<Vec<T>> for SimpleLinkedList<T> {
-    fn into(self) -> Vec<T> {
+    fn into(mut self) -> Vec<T> {
         let mut ret = vec![];
         loop {
             match self.head {
