@@ -1,36 +1,48 @@
 use std::collections::HashMap;
 
 pub fn count(nucleotide: char, dna: &str) -> Result<usize, char> {
-    println!("nuc: {}, dna: {}", nucleotide, dna);
-    let mut count = 0usize;
-    match nucleotide {
-        'A' => (),
-        'T' => (),
-        'G' => (),
-        'C' => (),
-        _ => return Err(nucleotide),
-    }
-    count = dna.matches(nucleotide).count();
-    match nucleotide_counts(dna) {
-        Ok(_) => Ok(count),
+    if nucleotide == 'A' ||
+        nucleotide == 'T' ||
+        nucleotide == 'G' ||
+        nucleotide == 'C' {
+        } else {
+            return Err(nucleotide);
+        }
+ 
+    let res = match nucleotide_counts(dna) {
+        Ok(counts) => {
+            let count = counts
+                .iter()
+                .map(|pair| if pair.0 == &nucleotide { pair.1 } else { &0usize })
+                .sum();
+            Ok(count)
+        },
         Err(e) => Err(e),
-    }
+    };
+    res
 }
 
 pub fn nucleotide_counts(dna: &str) -> Result<HashMap<char, usize>, char> {
     let mut nuc_counts: HashMap<char, usize> = HashMap::new();
+    nuc_counts.insert('A', 0);
+    nuc_counts.insert('T', 0);
+    nuc_counts.insert('G', 0);
+    nuc_counts.insert('C', 0);
     for ch in dna.chars().into_iter() {
-        nuc_counts.insert(ch, dna.matches(ch).count());
-    }
-    for hash in nuc_counts.iter() {
-        if hash.0 == &'A' ||
-            hash.0 == &'T' ||
-            hash.0 == &'G' ||
-            hash.0 == &'C' 
-            {}
-        else{
-            return Err(*hash.0);
+        if ch == 'A' ||
+           ch == 'T' ||
+           ch == 'G' ||
+           ch == 'C' {
+               nuc_counts.insert(ch, dna.matches(ch).count());
+        } else {
+            return Err(ch);
         }
     }
+
+    if nuc_counts.len() == 0 {
+        let mut ret = HashMap::new();
+        ret.insert(' ', 0);
+        return Ok(ret);
+    } 
     Ok(nuc_counts)
 }
