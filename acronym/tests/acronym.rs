@@ -42,7 +42,7 @@ fn all_caps_word_with_punctuation() {
 }
 
 #[test]
-#[ignore]
+//#[ignore]
 fn punctuation_without_whitespace() {
     assert_eq!(
         acronym::abbreviate("Complementary metal-oxide semiconductor"),

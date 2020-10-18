@@ -1,77 +1,70 @@
+#[derive(Clone)]
 struct WordCheck{
     word: String,
-    has_punc: Option<usize>,
-    all_caps: bool,
-    camel_case: bool,
+    handle_punc: Option<String>,
+    handle_camel: Option<String>,
 }
 
 impl WordCheck {
     fn new(s: &str) -> Self {
         WordCheck {
             word: String::from(s),
-            has_punc: has_punc(s),
-            all_caps: s == s.to_uppercase(),
-            camel_case: camel_case(s),
+            handle_punc: handle_punc(s),
+            handle_camel: handle_camel(s),
         }
     }
 
-    fn caps(&self) -> bool {
-        self.all_caps
+    fn abb(self) -> String {
+        if self.handle_punc.is_some() {self.handle_punc.unwrap()}
+        else if self.handle_camel.is_some() {self.handle_camel.unwrap()}
+        else {self.word.to_uppercase().chars().next().unwrap().to_string()}
     }
-
-    fn camel(&self) -> bool {
-        self.camel_case
-    }
-
-    fn abbr(&self) -> String {
-        let mut ret = String::from("");
-        match self.has_punc {
-            None => {
-                match self.caps() {
-                    true => {
-                        ret.push(self.word
-                                 .to_uppercase()
-                                 .chars()
-                                 .next()
-                                 .unwrap());
-                    },
-                    false => {
-                        match self.camel() {
-                            true => {
-                                ret.push_str(&self.word
-                                         .chars()
-                                         .map(|c| if c.is_uppercase() {c.to_string()}
-                                              else {' '.to_string()})
-                                         .collect::<Vec<String>>()
-                                         .join("")
-                                         .split_whitespace()
-                                         .collect::<Vec<&str>>()
-                                         .join(""));
-                            },
-                            false => {
-                                ret.push(self.word
-                                    .to_uppercase()
-                                    .chars()
-                                    .next()
-                                    .unwrap());
-
-                            },
-                        }
-                    },
-                }
+}
+fn handle_punc(s: &str) -> Option<String> {
+    let len = s.len();
+    for i in 0..len{
+        match s.chars().nth(i).unwrap().is_ascii_punctuation() {
+            true if len == 1 => {
+                return Some("".to_string())
             },
-            Some(i) => {
-                let mut spl = String::from("");
-                spl.push(self.word.chars().next().unwrap());
-                match self.word.chars().nth(i+1) {
-                    Some(ch) => spl.push(ch),
-                    None => (),
+            true if i == 0 => {
+                match s.chars().nth(i+1) {
+                    Some(ch) => return Some(ch.to_uppercase().to_string()),
+                    None => return None,
                 }
-                ret.push_str(&spl.to_uppercase());
+            }
+            true if i == len-1 => {
+                return None
             },
+            true => {
+                if s.chars().nth(i).unwrap() == '\'' {return None}
+                match s.chars().nth(i+1) {
+                    Some(ch) => {
+                        let mut abb = String::from("");
+                        abb.push(s.chars().nth(0).unwrap());
+                        abb.push(ch);
+                        abb = abb.to_uppercase();
+                        return Some(abb)
+                    },
+                    None => return None,
+                }
+            }
+            false => (),
         }
-        ret
     }
+    return None;
+}
+
+fn handle_camel(s: &str) -> Option<String> {
+    if s == s.to_uppercase() {return None;}
+    let max_count = s.len();
+    let mut ret = String::from("");
+    let count: usize = s.chars()
+        .map(|c| if c.is_uppercase() {ret.push(c); 1usize} else {0usize}).sum();
+    if count == max_count {return None;}
+    else if count == 0 {return None;}
+    else if count == 1 {return None;}
+    else {return Some(ret);}
 }
 
 pub fn abbreviate(phrase: &str) -> String {
@@ -81,29 +74,7 @@ pub fn abbreviate(phrase: &str) -> String {
         .map(|s| WordCheck::new(s))
         .collect::<Vec<WordCheck>>()
         .iter()
-        .map(|wc| wc.abbr())
+        .map(|wc| wc.clone().abb())
         .collect::<Vec<String>>()
         .join("")
-}
-
-fn has_punc(word: &str) -> Option<usize> {
-    let mut ret = None;
-    for i in (0..word.len()).rev() {
-        match word.chars().nth(i).unwrap().is_ascii_punctuation() {
-            true => ret = Some(i),
-            false => (),
-        }
     }
-    ret
-}
-
-fn camel_case(word: &str) -> bool {
-    let max_count = word.len();
-    let count = word.chars()
-        .map(|c| if c.is_uppercase() {1usize} else {0usize}).sum();
-    match count {
-        max_count => false,
-        0..=1 => false,
-        _ => true,
-    }
-}
