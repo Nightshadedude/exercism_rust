@@ -9,37 +9,90 @@ pub enum Direction {
     West,
 }
 
-pub struct Robot;
+pub struct Robot {
+    dir: Direction,
+    point: (i32, i32),
+}
 
 impl Robot {
     pub fn new(x: i32, y: i32, d: Direction) -> Self {
-        unimplemented!("Create a robot at (x, y) ({}, {}) facing {:?}", x, y, d,)
+        Robot {
+            dir: d,
+            point: (x,y),
+        }
     }
 
     pub fn turn_right(self) -> Self {
-        unimplemented!()
+        let pt = self.point;
+        let dir = match self.dir {
+            Direction::North => Direction::East,
+            Direction::South => Direction::West,
+            Direction::East => Direction::South,
+            Direction::West => Direction::North,
+        };
+
+        Robot {
+            dir,
+            point: pt,
+        }
     }
 
     pub fn turn_left(self) -> Self {
-        unimplemented!()
+        let pt = self.point;
+        let dir = match self.dir {
+            Direction::North => Direction::West,
+            Direction::South => Direction::East,
+            Direction::East => Direction::North,
+            Direction::West => Direction::South,
+        };
+
+        Robot {
+            dir,
+            point: pt,
+        }
     }
 
     pub fn advance(self) -> Self {
-        unimplemented!()
+        let (mut x, mut y) = self.point;
+        match self.dir {
+            Direction::North => {
+                y = y + 1;
+            },
+            Direction::South => {
+                y = y - 1;
+            },
+            Direction::East => {
+                x = x + 1;
+            },
+            Direction::West => {
+                x = x - 1;
+            },
+        }
+
+        Robot {
+            dir: self.dir,
+            point: (x, y),
+        }
     }
 
     pub fn instructions(self, instructions: &str) -> Self {
-        unimplemented!(
-            "Follow the given sequence of instructions: {}",
-            instructions
-        )
+        let mut bot = self;
+        for ch in instructions.chars().into_iter() {
+            match ch {
+                'A' => bot = bot.advance(),
+                'R' => bot = bot.turn_right(),
+                'L' => bot = bot.turn_left(),
+                _ => bot = bot,
+            }
+        }
+        bot
     }
 
     pub fn position(&self) -> (i32, i32) {
-        unimplemented!()
+        self.point
     }
 
     pub fn direction(&self) -> &Direction {
-        unimplemented!()
+        &self.dir
     }
 }
