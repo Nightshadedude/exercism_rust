@@ -41,7 +41,7 @@ fn test_puzzle_with_four_letters() {
 }
 
 #[test]
-#[ignore]
+//#[ignore]
 fn test_puzzle_with_six_letters() {
     assert_alphametic_solution_eq(
         "NO + NO + TOO == LATE",
