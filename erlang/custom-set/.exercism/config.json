@@ -1,0 +1,22 @@
+{
+  "authors": [
+    "NobbZ"
+  ],
+  "contributors": [
+    "ErikSchierboom",
+    "iHiD",
+    "juhlig"
+  ],
+  "files": {
+    "solution": [
+      "src/custom_set.erl"
+    ],
+    "test": [
+      "test/custom_set_tests.erl"
+    ],
+    "example": [
+      ".meta/example.erl"
+    ]
+  },
+  "blurb": "Create a custom set type."
+}
